@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -13,44 +14,45 @@ public class ReadExcel {
 		try {
 			File file = new File("D:\\sheet.xlsx"); // creating a new file instance
 			FileInputStream fis = new FileInputStream(file); // obtaining bytes from the file
-//creating Workbook instance that refers to .xlsx file
 			String tab = "\t";
 			String nl = "\n";
 			String toSend = "";
-			String suffix = "";
 			XSSFWorkbook wb = new XSSFWorkbook(fis);
+			wb.setMissingCellPolicy(MissingCellPolicy.RETURN_BLANK_AS_NULL);
 			System.out.println("Sheets: " + wb.getNumberOfSheets());
-			// wb.getNumberOfSheets();
-				XSSFSheet sheet = wb.getSheetAt(0); // creating a Sheet object to retrieve object
-				Iterator<Row> itr = sheet.iterator(); // iterating over excel file
-				int noOfColumns = sheet.getRow(0).getLastCellNum();
-				System.out.println("Columns: " + noOfColumns);
-				DataFormatter formatter = new DataFormatter();
-				while (itr.hasNext()) {
-					Row row = itr.next();
-					Iterator<Cell> cellIterator = row.cellIterator();
+			DataFormatter formatter = new DataFormatter();
+			XSSFSheet sheet = wb.getSheetAt(0);
 
-					while (cellIterator.hasNext()) {
-						Cell cell = cellIterator.next();
-						int cellNum = cell.getColumnIndex();
-						if (cellNum == noOfColumns - 1) {
-							suffix = nl;
+			for (int rn = sheet.getFirstRowNum(); rn <= sheet.getLastRowNum(); rn++) {
+
+				Row row = sheet.getRow(rn);
+				if (row == null) {
+
+					// There is no data in this row, handle as needed
+				} else {
+
+					for (int cn = 0; cn < row.getLastCellNum(); cn++) {
+						Cell cell = row.getCell(cn);
+
+						if (cell == null) {
+
+							String text = "";
+							toSend = toSend + text + tab;
+
+						} else {
+							String text = formatter.formatCellValue(cell);
+							toSend = toSend + text + tab;
+
 						}
-
-						else {
-
-							suffix = tab;
-						}
-
-						String text = formatter.formatCellValue(cell);
-						toSend = toSend + text + suffix;
-
 					}
-					// System.out.println("");
+
+					toSend = toSend + nl;
 
 				}
-				System.out.print(toSend);
-			
+
+			}
+
+			System.out.print(toSend);
 
 			wb.close();
 
