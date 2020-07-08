@@ -37,11 +37,11 @@ public class ReadExcel {
 						if (cell == null) {
 
 							String text = "";
-							toSend = toSend + text + tab;
+							toSend += text + tab;
 
 						} else {
 							String text = formatter.formatCellValue(cell);
-							toSend = toSend + text + tab;
+							toSend += text + tab;
 
 						}
 					}
